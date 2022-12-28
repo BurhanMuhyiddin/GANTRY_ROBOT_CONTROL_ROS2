@@ -1,0 +1,23 @@
+# This config file is used by ros2_control
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz
+
+    crane_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+crane_controller:
+  ros__parameters:
+    joints:
+      - slider_fb_link_middle_link_a_joint
+      - virtual_link_slider_fb_link_joint
+      - sslider_ud_link_virtual_link_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
