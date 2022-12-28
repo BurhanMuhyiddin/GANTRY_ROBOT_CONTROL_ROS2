@@ -1,6 +1,0 @@
-# Default initial positions for robot's ros2_control fake system
-
-initial_positions:
-  slider_fb_link_middle_link_a_joint: 0
-  sslider_ud_link_virtual_link_joint: 0
-  virtual_link_slider_fb_link_joint: 0
