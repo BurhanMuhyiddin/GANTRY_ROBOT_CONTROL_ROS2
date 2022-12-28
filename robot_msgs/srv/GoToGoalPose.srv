@@ -1,0 +1,6 @@
+geometry_msgs/Pose goal_pose
+std_msgs/Float64 velocity_scaling
+std_msgs/Float64 acc_scaling
+std_msgs/Int32 planning_time
+---
+bool success

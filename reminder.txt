@@ -1,0 +1,37 @@
+Commands:
+
+ros2 launch robot_moveit_config demo.launch.py
+
+ros2 run  robot_control robot_position_control
+
+To Do:
+
+1. Configure trac-ik and check if works
+    https://github.com/aprotyas/trac_ik/blob/ros2/trac_ik_kinematics_plugin/README.md
+
+
+# joint_limits.yaml allows the dynamics properties specified in the URDF to be overwritten or augmented as needed
+
+# For beginners, we downscale velocity and acceleration limits.
+# You can always specify higher scaling factors (<= 1.0) in your motion requests.  # Increase the values below to 1.0 to always move at maximum speed.
+default_velocity_scaling_factor: 0.1
+default_acceleration_scaling_factor: 0.1
+
+# Specific joint properties can be changed with the keys [max_position, min_position, max_velocity, max_acceleration]
+# Joint limits can be turned off with [has_velocity_limits, has_acceleration_limits]
+joint_limits:
+  slider_fb_link_middle_link_a_joint:
+    has_velocity_limits: true
+    max_velocity: 100.0
+    has_acceleration_limits: false
+    max_acceleration: 0.0
+  sslider_ud_link_virtual_link_joint:
+    has_velocity_limits: true
+    max_velocity: 100.0
+    has_acceleration_limits: false
+    max_acceleration: 0.0
+  virtual_link_slider_fb_link_joint:
+    has_velocity_limits: true
+    max_velocity: 100.0
+    has_acceleration_limits: false
+    max_acceleration: 0.0
