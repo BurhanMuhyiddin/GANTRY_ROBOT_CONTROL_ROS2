@@ -25,8 +25,14 @@ find_package(interactive_markers REQUIRED)
 find_package(geometric_shapes REQUIRED)
 find_package(control_msgs REQUIRED)
 find_package(moveit_msgs REQUIRED)
-
+find_package(behaviortree_cpp_v3 REQUIRED)
+find_package(ros2_behavior_tree_msgs REQUIRED)
 find_package(robot_msgs REQUIRED)
+find_package(ros2_behavior_tree REQUIRED)
+
+include_directories(
+  include
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -42,6 +48,9 @@ endif()
 
 # C++
 set(DEPENDENCIES
+  behaviortree_cpp_v3
+  ros2_behavior_tree_msgs
+  ros2_behavior_tree
   ament_cmake
   rclcpp
   rclcpp_action
@@ -94,6 +103,22 @@ ament_target_dependencies(go_to_goal_pose_test_client ${DEPENDENCIES})
 install(TARGETS
 go_to_goal_pose_test_client
   DESTINATION lib/${PROJECT_NAME})
+
+# robot_control_bt
+add_executable(robot_control_bt
+  src/robot_control_bt.cpp)
+target_include_directories(robot_control_bt
+  PUBLIC include)
+ament_target_dependencies(robot_control_bt ${DEPENDENCIES})
+install(TARGETS
+robot_control_bt
+  DESTINATION lib/${PROJECT_NAME})
+
+install(DIRECTORY include/
+  DESTINATION include/
+)
+
+ament_export_include_directories(include)
 
 # Python
 install(PROGRAMS

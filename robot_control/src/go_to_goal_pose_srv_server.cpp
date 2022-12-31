@@ -19,6 +19,7 @@ class GoToGoalPose : public rclcpp::Node
 {
 public:
     GoToGoalPose() : Node("go_to_goal_pose_server_node"){
+        RCLCPP_INFO(LOGGER, "[GoToGoalPoseServer] Server created...\n");
         move_group_node = rclcpp::Node::make_shared("move_group_interface_node");
 
         service = this->create_service<robot_msgs::srv::GoToGoalPose>("go_to_goal_pose_server",
@@ -30,12 +31,10 @@ public:
         yj_min = -1.65; yj_max = 1.65;
         z_min = 1.78; z_max = 4.72;
         zj_min = 0.10; zj_max = 3.04;
-
-        executor.add_node(move_group_node);
-        executor.add_node(this->get_node_base_interface());
-        executor.spin();
     }
-    ~GoToGoalPose() {}
+    ~GoToGoalPose() {
+        RCLCPP_INFO(LOGGER, "[GoToGoalPoseServer] Server destroyed...\n");
+    }
 
 private:
     void go_to_goal_pose_clb(const std::shared_ptr<robot_msgs::srv::GoToGoalPose::Request> request,
@@ -46,7 +45,6 @@ private:
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 private:
-    std::shared_ptr<rclcpp::Node> move_group_node;
     rclcpp::Service<robot_msgs::srv::GoToGoalPose>::SharedPtr service;
     double x_min, x_max;
     double xj_min, xj_max;
@@ -55,11 +53,14 @@ private:
     double z_min, z_max;
     double zj_min, zj_max;
     const rclcpp::Logger LOGGER = rclcpp::get_logger("go_to_goal_server_logger");
-    rclcpp::executors::MultiThreadedExecutor executor;
+public:
+    std::shared_ptr<rclcpp::Node> move_group_node;
 };
 
 void GoToGoalPose::go_to_goal_pose_clb(const std::shared_ptr<robot_msgs::srv::GoToGoalPose::Request> request,
                         std::shared_ptr<robot_msgs::srv::GoToGoalPose::Response> response){
+    RCLCPP_INFO(LOGGER, "[GoToGoalPoseServer] Server callback called...\n");
+
     double vel_scaling = 1.0, acc_scaling = 1.0;
     int planning_time = 10; // seconds
     if (request->velocity_scaling.data >= 0.0 && request->velocity_scaling.data <= 1.0)
@@ -106,12 +107,19 @@ void GoToGoalPose::go_to_goal_pose_clb(const std::shared_ptr<robot_msgs::srv::Go
         RCLCPP_INFO(LOGGER, "Error: %s", e.what());
         response->success = false;
     }
+
+    RCLCPP_INFO(LOGGER, "[GoToGoalPoseServer] Server callback finished...\n");
 }
 
 int main(int argc, char** argv){
     rclcpp::init(argc, argv);
     
-    GoToGoalPose go_to_goal_pose_ins1;
+    rclcpp::Node::SharedPtr go_to_goal_pose_ins1 = std::make_shared<GoToGoalPose>();
+
+    rclcpp::executors::MultiThreadedExecutor executor;
+    executor.add_node(go_to_goal_pose_ins1);
+    executor.add_node((dynamic_cast<GoToGoalPose*>(go_to_goal_pose_ins1.get()))->move_group_node);
+    executor.spin();
 
     rclcpp::shutdown();
 

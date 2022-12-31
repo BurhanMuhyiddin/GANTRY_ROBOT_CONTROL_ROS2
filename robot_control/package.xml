@@ -25,6 +25,9 @@
   <depend>(control_msgs REQUIRED)</depend>
   <depend>(moveit_msgs REQUIRED)</depend>
   <depend>robot_msgs</depend>
+  <depend>behaviortree_cpp_v3</depend>
+  <depend>ros2_behavior_tree_msgs</depend>
+  <depend>ros2_behavior_tree</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
