@@ -29,7 +29,7 @@ public:
         xj_min = 0.0; xj_max = 8.80;
         y_min = -1.65; y_max = 1.65;
         yj_min = -1.65; yj_max = 1.65;
-        z_min = 1.78; z_max = 4.72;
+        z_min = 0.26; z_max = 3.19;
         zj_min = 0.10; zj_max = 3.04;
     }
     ~GoToGoalPose() {

@@ -14,3 +14,5 @@ moveit_simple_controller_manager:
       - slider_fb_link_middle_link_a_joint
       - virtual_link_slider_fb_link_joint
       - sslider_ud_link_virtual_link_joint
+    action_ns: follow_joint_trajectory
+    default: true

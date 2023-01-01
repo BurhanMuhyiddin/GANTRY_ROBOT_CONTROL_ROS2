@@ -18,7 +18,6 @@ public:
     {
     }
 
-
     static BT::PortsList providedPorts()
     {
         return augment_basic_ports({

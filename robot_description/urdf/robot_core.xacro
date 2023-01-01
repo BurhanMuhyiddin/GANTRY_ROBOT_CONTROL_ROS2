@@ -263,4 +263,12 @@
         <limit lower="-${slider_fb_link_length/2-slider_fb_link_width/2}" upper="${slider_fb_link_length/2-slider_fb_link_width/2}" velocity="100" effort="100"/> 
     </joint>
 
+    <link name="virtual_gripper_link"/>
+
+    <joint name="virtual_gripper_link_sslider_ud_link_joint" type="fixed">
+        <parent link="slider_ud_link"/>
+        <child link="virtual_gripper_link"/>
+        <origin xyz="0.0 0.0 -${slider_ud_link_length/2}"/>
+    </joint>
+
 </robot>
