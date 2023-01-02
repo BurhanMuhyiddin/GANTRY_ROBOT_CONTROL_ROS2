@@ -28,6 +28,8 @@ public:
     {
         return {
             BT::InputPort<std::shared_ptr<rclcpp::Node>>("node_handle", "Node to register"),
+            BT::InputPort<std::shared_ptr<moveit::planning_interface::MoveGroupInterface>>("movegroup_interface", "MoveGroup interface"),
+            BT::InputPort<std::shared_ptr<moveit::planning_interface::PlanningSceneInterface>>("planning_interface", "Planning Interface"),
             BT::InputPort<double>("px", "X position"),
             BT::InputPort<double>("py", "Y position"),
             BT::InputPort<double>("pz", "Z position"),
@@ -41,8 +43,17 @@ public:
 
     BT::NodeStatus tick() override
     {
-        if (!getInput("node_handle", move_group_node_)){
+        std::shared_ptr<rclcpp::Node> move_group_node;
+        if (!getInput("node_handle", move_group_node)){
             throw BT::RuntimeError("Missing parameter [node_handle]");
+        }
+        std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group;
+        if (!getInput("movegroup_interface", move_group)){
+            throw BT::RuntimeError("Missing parameter [movegroup_interface]");
+        }
+        std::shared_ptr<moveit::planning_interface::PlanningSceneInterface> planning_scene_interface;
+        if (!getInput("planning_interface", planning_scene_interface)){
+            throw BT::RuntimeError("Missing parameter [planning_interface]");
         }
         double px, py, pz;
         if (!getInput("px", px) || !getInput("py", py) || !getInput("pz", pz)){
@@ -52,22 +63,11 @@ public:
         if (!getInput("w", w) || !getInput("l", l) || !getInput("h", h)){
             throw BT::RuntimeError("Please specify box dimensions correctly.");
         }
-        
-        // rclcpp::NodeOptions node_options;
-        // node_options.automatically_declare_parameters_from_overrides(true);
-        // move_group_node_ = rclcpp::Node::make_shared("move_group_interface_tutorial", node_options);
 
-        static const std::string PLANNING_GROUP = "crane";
-
-        // rclcpp::executors::SingleThreadedExecutor executor;
-        // executor.add_node(move_group_node_);
-        // std::thread executor_thread([&executor]() {executor.spin();});
-
-        moveit::planning_interface::MoveGroupInterface move_group(move_group_node_, PLANNING_GROUP);
-        moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+        auto note_thread = std::make_unique<ros2_behavior_tree::NodeThread>(move_group_node);
 
         moveit_msgs::msg::CollisionObject collision_object;
-        collision_object.header.frame_id = move_group.getPlanningFrame();
+        collision_object.header.frame_id = move_group->getPlanningFrame();
 
         collision_object.id = "box" + std::to_string(object_count_);
 
@@ -91,7 +91,8 @@ public:
         std::vector<moveit_msgs::msg::CollisionObject> collision_objects;
         collision_objects.push_back(collision_object);
 
-        planning_scene_interface.addCollisionObjects(collision_objects);
+        planning_scene_interface->addCollisionObjects(collision_objects);
+        // planning_scene_interface->applyCollisionObject(collision_object);
 
         object_count_++;
 
@@ -102,17 +103,11 @@ public:
             throw BT::RuntimeError("Failed to set output port of [object_count].");
         }
 
-        // RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Object count is %d\n", object_count);
-
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-
-        // executor.cancel();
-        // executor_thread.join();
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 
         return BT::NodeStatus::SUCCESS;
     }
 private:
-    std::shared_ptr<rclcpp::Node> move_group_node_;
     static int object_count_;
 };
 

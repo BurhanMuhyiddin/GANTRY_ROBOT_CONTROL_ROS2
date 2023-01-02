@@ -28,6 +28,8 @@ public:
     {
         return {
             BT::InputPort<std::shared_ptr<rclcpp::Node>>("node_handle", "Node to register"),
+            BT::InputPort<std::shared_ptr<moveit::planning_interface::MoveGroupInterface>>("movegroup_interface", "MoveGroup interface"),
+            BT::InputPort<std::shared_ptr<moveit::planning_interface::PlanningSceneInterface>>("planning_interface", "Planning Interface"),
             BT::InputPort<std::string>("object_id", "ID of object to be grasped"),
             BT::InputPort<bool>("grasp", "Grasp[1] or release[0]"),
         };
@@ -35,8 +37,17 @@ public:
 
     BT::NodeStatus tick() override
     {
-        if (!getInput("node_handle", move_group_node_)){
+        std::shared_ptr<rclcpp::Node> move_group_node;
+        if (!getInput("node_handle", move_group_node)){
             throw BT::RuntimeError("Missing parameter [node_handle]");
+        }
+        std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group;
+        if (!getInput("movegroup_interface", move_group)){
+            throw BT::RuntimeError("Missing parameter [movegroup_interface]");
+        }
+        std::shared_ptr<moveit::planning_interface::PlanningSceneInterface> planning_scene_interface;
+        if (!getInput("planning_interface", planning_scene_interface)){
+            throw BT::RuntimeError("Missing parameter [planning_interface]");
         }
         std::string object_id;
         if (!getInput("object_id", object_id)){
@@ -47,26 +58,23 @@ public:
             throw BT::RuntimeError("Missing parameter [grasp]");
         }
 
-        static const std::string PLANNING_GROUP = "crane";
-
-        moveit::planning_interface::MoveGroupInterface move_group(move_group_node_, PLANNING_GROUP);
-        moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+        auto note_thread = std::make_unique<ros2_behavior_tree::NodeThread>(move_group_node);
 
         if (is_grasp){
             std::vector<std::string> touch_links;
             touch_links.push_back("virtual_gripper_link");
             touch_links.push_back("slider_ud_link");
-            move_group.attachObject(object_id, "virtual_gripper_link", touch_links);
+            move_group->attachObject(object_id, "virtual_gripper_link", touch_links);
         }else{
-            move_group.detachObject(object_id);
+            move_group->detachObject(object_id);
         }
 
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        move_group->setStartStateToCurrentState();
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 
         return BT::NodeStatus::SUCCESS;
     }
-private:
-    std::shared_ptr<rclcpp::Node> move_group_node_;
 };
 
 #endif

@@ -61,7 +61,7 @@ public:
         double gy = start_y + (col_num-1) * 1.0 * place_l;
         double gz = start_z + num_layers * 1.0 * place_h;
 
-        bool should_stop = (num_layers < des_num_layers) ? false : true;
+        bool should_stop = (object_count != (des_num_layers * des_col_num * des_row_num)) ? false : true;
 
         RCLCPP_INFO(rclcpp::get_logger("CalculateGoalPoseNode"), "should_stop: %s\n", should_stop ? "true\n" : "false\n");
 
