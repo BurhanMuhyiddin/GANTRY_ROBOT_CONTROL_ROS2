@@ -62,7 +62,7 @@ public:
       throw BT::RuntimeError("Missing parameter [spin] in CreateROS2Node");
     }
 
-    auto node = std::make_shared<rclcpp::Node>(node_name, ns);
+    auto node = std::make_shared<rclcpp::Node>(node_name, ns, rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true));
 
     if (!setOutput("node_handle", node)) {
       throw BT::RuntimeError("Failed to set output port value [node_handle] in CreateROS2Node");

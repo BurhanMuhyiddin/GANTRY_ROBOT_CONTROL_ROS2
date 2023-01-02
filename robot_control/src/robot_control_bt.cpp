@@ -51,7 +51,7 @@ int main(int argc, char** argv)
   <root main_tree_to_execute = "MainTree" >
      <BehaviorTree ID="MainTree">
         <Sequence name="root">
-            <CreateROS2Node node_name="test_bt_node" namespace="" spin="true" node_handle="{ros2_node}"/>
+            <CreateROS2Node node_name="test_bt_node" namespace="" spin="false" node_handle="{ros2_node}"/>
             <AddObject node_handle="{ros2_node}" px="3.0" py="1.0" pz="0.25" w="0.5" l="0.5" h="0.5" object_id="{box_id}" object_count="{box_count}" />
             <GoToGoalPose node_handle="{ros2_node}" gx="3.0" gy="1.0" gz="0.55" />
             <GrabReleaseObject node_handle="{ros2_node}" object_id="{box_id}" grasp="true" />

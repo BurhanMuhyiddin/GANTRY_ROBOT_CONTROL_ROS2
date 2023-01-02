@@ -16,6 +16,8 @@
 #include <moveit_msgs/msg/attached_collision_object.hpp>
 #include <moveit_msgs/msg/collision_object.hpp>
 
+#include "ros2_behavior_tree/node_thread.hpp"
+
 class GoToGoalPoseNode : public BT::SyncActionNode
 {
 public:
@@ -52,6 +54,8 @@ public:
 
         RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[GoToGoalPoseNode] callback started...\n");
 
+        static const std::string PLANNING_GROUP = "crane";
+
         // rclcpp::NodeOptions node_options;
         // node_options.automatically_declare_parameters_from_overrides(true);
         // move_group_node_ = rclcpp::Node::make_shared("move_group_interface_tutorial", node_options);
@@ -59,11 +63,13 @@ public:
         // rclcpp::executors::MultiThreadedExecutor executor;
         // executor.add_node(move_group_node_);
         // std::thread([&executor]() {executor.spin();}).detach();
+
         try
         {
-            static const std::string PLANNING_GROUP = "crane";
-
             moveit::planning_interface::MoveGroupInterface move_group(move_group_node_, PLANNING_GROUP);
+
+            auto note_thread = std::make_unique<ros2_behavior_tree::NodeThread>(move_group_node_);
+
             move_group.setMaxVelocityScalingFactor(1.0);
             move_group.setMaxAccelerationScalingFactor(1.0);
 
