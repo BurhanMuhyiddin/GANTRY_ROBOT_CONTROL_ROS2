@@ -92,7 +92,7 @@ public:
             joint_group_positions[2] = map_vals(gy, y_min_, y_max_, yj_max_, yj_min_);//y;
             move_group.setJointValueTarget(joint_group_positions);
 
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+            // std::this_thread::sleep_for(std::chrono::seconds(5));
 
             RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[GoToGoalPoseNode] planning started...\n");
             bool success = (move_group.plan(my_plan) == moveit::core::MoveItErrorCode::SUCCESS);

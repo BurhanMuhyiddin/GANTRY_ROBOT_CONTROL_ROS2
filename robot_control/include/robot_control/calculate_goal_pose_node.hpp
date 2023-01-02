@@ -36,18 +36,21 @@ public:
             throw BT::RuntimeError("Please specify number of boxes.");
         }
 
-        double w = 0.5, l = 0.5, h = 0.25;
-        int des_num_layers = 2;
+        double w = 0.5, l = 0.5, h = 0.5;
+        int des_num_layers = 3;
         int des_col_num = 3, des_row_num = 3;
 
-        int row_num = ceil(object_count*1.0 / des_col_num*1.0);
-        int col_num = des_col_num - abs(row_num * des_col_num - object_count);
+        int temp = des_col_num * des_row_num;
+        int wrapped_count = object_count - (floor((object_count-1)*1.0 / temp*1.0)) * temp;
+        int row_num = ceil(wrapped_count*1.0 / des_col_num*1.0);
+        int col_num = des_col_num - abs(row_num * des_col_num - wrapped_count);
 
-        int num_layers = floor(object_count * 1.0 / (des_col_num * des_row_num * 1.0));
+        int num_layers = floor((object_count-1) * 1.0 / (des_col_num * des_row_num * 1.0));
 
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "row_num: %d\n", row_num);
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "col_num: %d\n", col_num);
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "num_layers: %d\n", num_layers);
+        RCLCPP_INFO(rclcpp::get_logger("CalculateGoalPoseNode"), "object_count: %d\n", object_count);
+        RCLCPP_INFO(rclcpp::get_logger("CalculateGoalPoseNode"), "row_num: %d\n", row_num);
+        RCLCPP_INFO(rclcpp::get_logger("CalculateGoalPoseNode"), "col_num: %d\n", col_num);
+        RCLCPP_INFO(rclcpp::get_logger("CalculateGoalPoseNode"), "num_layers: %d\n", num_layers);
 
         double start_x = -3.38, start_y = -1.6, start_z = 0.5;
         double place_w = w + 0.03;
@@ -59,6 +62,8 @@ public:
         double gz = start_z + num_layers * 1.0 * place_h;
 
         bool should_stop = (num_layers < des_num_layers) ? false : true;
+
+        RCLCPP_INFO(rclcpp::get_logger("CalculateGoalPoseNode"), "should_stop: %s\n", should_stop ? "true\n" : "false\n");
 
         if (!setOutput("gx", gx) || !setOutput("gy", gy) || !setOutput("gz", gz)){
             throw BT::RuntimeError("Failed to set output port of [gx, gy, gz].");
