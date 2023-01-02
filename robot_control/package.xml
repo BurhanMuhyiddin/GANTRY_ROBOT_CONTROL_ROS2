@@ -11,10 +11,6 @@
 
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
-  <depend>yasmin</depend>
-  <depend>yasmin_ros</depend>
-  <depend>yasmin_viewer</depend>
-  <depend>simple_node</depend>
   <depend>nav_msgs</depend>
   <depend>(rclcpp_action REQUIRED)</depend>
   <depend>(moveit_core REQUIRED)</depend>
@@ -31,8 +27,6 @@
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-
-  <!-- <exec_depend>robot_msgs</exec_depend> -->
 
   <export>
     <build_type>ament_cmake</build_type>

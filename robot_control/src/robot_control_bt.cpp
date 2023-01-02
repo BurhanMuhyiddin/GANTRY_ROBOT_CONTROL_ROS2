@@ -1,12 +1,12 @@
+#include "rclcpp/rclcpp.hpp"
+
 #include <memory>
 #include <string>
 
-// #include "robot_control/go_to_goal_pose_client.hpp"
 #include "ros2_behavior_tree/behavior_tree.hpp"
 #include "ros2_behavior_tree/node_thread.hpp"
 #include "ros2_behavior_tree/ros2_service_client_node.hpp"
 #include "robot_control/create_ros2_node.hpp"
-#include "rclcpp/rclcpp.hpp"
 #include "robot_control/create_object.hpp"
 #include "robot_control/grab_release_object.hpp"
 #include "robot_control/go_to_goal_pose_node.hpp"
@@ -14,14 +14,13 @@
 #include "robot_control/repeat_until_node.hpp"
 #include "robot_control/create_planning_interface_node.hpp"
 
-class TestServiceNode
+class RunBehaviorTree
 {
 public:
-    TestServiceNode(const std::string &service_name, const std::string xml_text)
+    RunBehaviorTree(const std::string xml_text)
     {
         ros2_behavior_tree::BehaviorTree bt;
         bt.register_a_node<ros2_behavior_tree::CreateROS2Node>("CreateROS2Node");
-        // bt.register_a_node<GoToGoalposeClient>("GoToGoalPose");
         bt.register_a_node<AddObjectNode>("AddObject");
         bt.register_a_node<GrabReleaseObjectNode>("GrabReleaseObject");
         bt.register_a_node<GoToGoalPoseNode>("GoToGoalPose");
@@ -33,17 +32,9 @@ public:
         auto bt_result = bt.execute();
     }
 
-    ~TestServiceNode()
+    ~RunBehaviorTree()
     {
-        // ros2_node_thread_.reset();
-        // ros2_node_.reset();
     }
-
-public:
-    BT::Blackboard::Ptr blackboard_;
-    std::shared_ptr<rclcpp::Node> ros2_node_;
-    std::shared_ptr<ros2_behavior_tree::NodeThread> ros2_node_thread_;
-    // std::unique_ptr<GoToGoalposeClient> go_to_goal_pose_client_;
 };
 
 int main(int argc, char** argv)
@@ -74,7 +65,7 @@ int main(int argc, char** argv)
  </root>
     )";
 
-    auto node = std::make_shared<TestServiceNode>(std::move("go_to_goal_pose_server"), std::move(xml_text));
+    auto node = std::make_shared<RunBehaviorTree>(std::move(xml_text));
 
     rclcpp::shutdown();
 

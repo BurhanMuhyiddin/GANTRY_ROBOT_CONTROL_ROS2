@@ -2,10 +2,10 @@
 #define GO_TO_GOAL_POSE_NODE_HPP_
 
 #include "behaviortree_cpp_v3/action_node.h"
+#include "ros2_behavior_tree/node_thread.hpp"
 
 #include <string>
 #include <vector>
-#include <thread>
 #include <chrono>
 
 #include "rclcpp/rclcpp.hpp"
@@ -15,8 +15,6 @@
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #include <moveit_msgs/msg/attached_collision_object.hpp>
 #include <moveit_msgs/msg/collision_object.hpp>
-
-#include "ros2_behavior_tree/node_thread.hpp"
 
 class GoToGoalPoseNode : public BT::SyncActionNode
 {
@@ -72,43 +70,30 @@ public:
             move_group->setMaxVelocityScalingFactor(1.0);
             move_group->setMaxAccelerationScalingFactor(1.0);
 
-            // const std::string PLANNING_GROUP = "crane";
-            // const moveit::core::JointModelGroup* joint_model_group = move_group->getCurrentState(10)->getJointModelGroup(PLANNING_GROUP);
-
-            // moveit::core::RobotState start_state(*move_group->getCurrentState(10));
-            // move_group->setStartState(start_state);
-
-            moveit::planning_interface::MoveGroupInterface::Plan my_plan;
-
-            // moveit::core::RobotStatePtr current_state = move_group->getCurrentState(10);
-
             std::vector<double> joint_group_positions(3, 0.0);
-            // current_state->copyJointGroupPositions(joint_model_group, joint_group_positions);
-        
             joint_group_positions[0] = map_vals(gx, x_min_, x_max_, xj_max_, xj_min_);//x;
             joint_group_positions[1] = map_vals(gz, z_min_, z_max_, zj_max_, zj_min_);//z;
             joint_group_positions[2] = map_vals(gy, y_min_, y_max_, yj_max_, yj_min_);//y;
             move_group->setJointValueTarget(joint_group_positions);
 
-            // std::this_thread::sleep_for(std::chrono::seconds(5));
-
-            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[GoToGoalPoseNode] planning started...\n");
+            RCLCPP_INFO(rclcpp::get_logger("GoToGoalPoseNode"), "Planning started...\n");
+            moveit::planning_interface::MoveGroupInterface::Plan my_plan;
             bool success = (move_group->plan(my_plan) == moveit::core::MoveItErrorCode::SUCCESS);
-            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Planning %s", success ? "SUCCEDED" : "FAILED");
+            RCLCPP_INFO(rclcpp::get_logger("GoToGoalPoseNode"), "Planning %s", success ? "SUCCEDED" : "FAILED");
             if (success){
-                RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[GoToGoalPoseNode] execution started...\n");
+                RCLCPP_INFO(rclcpp::get_logger("GoToGoalPoseNode"), "Execution started...\n");
                 move_group->execute(my_plan);
             }else{
                 return BT::NodeStatus::FAILURE;
             }
         }catch(const std::exception& e){
-            RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Error: %s", e.what());
+            RCLCPP_INFO(rclcpp::get_logger("GoToGoalPoseNode"), "Error: %s", e.what());
             return BT::NodeStatus::FAILURE;
         }
 
         std::this_thread::sleep_for(std::chrono::seconds(2));
 
-        RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "[GoToGoalPoseNode] callback finished...\n");
+        RCLCPP_INFO(rclcpp::get_logger("GoToGoalPoseNode"), "Callback finished...\n");
 
         return BT::NodeStatus::SUCCESS;
     }

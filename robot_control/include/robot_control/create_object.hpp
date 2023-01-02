@@ -92,7 +92,6 @@ public:
         collision_objects.push_back(collision_object);
 
         planning_scene_interface->addCollisionObjects(collision_objects);
-        // planning_scene_interface->applyCollisionObject(collision_object);
 
         object_count_++;
 

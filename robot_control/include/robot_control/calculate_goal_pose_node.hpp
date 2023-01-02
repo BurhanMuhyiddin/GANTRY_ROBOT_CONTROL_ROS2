@@ -72,7 +72,7 @@ public:
             throw BT::RuntimeError("Failed to set output port of [finish].");
         }
 
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 
         return BT::NodeStatus::SUCCESS;
     }

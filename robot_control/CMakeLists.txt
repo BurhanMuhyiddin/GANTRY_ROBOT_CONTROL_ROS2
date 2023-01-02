@@ -12,10 +12,6 @@ find_package(ament_cmake REQUIRED)
 # find_package(<dependency> REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
-find_package(yasmin REQUIRED)
-find_package(yasmin_ros REQUIRED)
-find_package(yasmin_viewer REQUIRED)
-find_package(simple_node REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(moveit_core REQUIRED)
@@ -59,20 +55,7 @@ set(DEPENDENCIES
   interactive_markers
   moveit_ros_planning
   control_msgs
-  robot_msgs
-  yasmin
-  yasmin_ros
-  yasmin_viewer)
-
-# robot_position_control
-add_executable(robot_position_control
-  src/robot_position_control.cpp)
-target_include_directories(robot_position_control
-  PUBLIC include)
-ament_target_dependencies(robot_position_control ${DEPENDENCIES})
-install(TARGETS
-  robot_position_control
-  DESTINATION lib/${PROJECT_NAME})
+  robot_msgs)
 
 # go_to_goal_pose_srv_server
 add_executable(go_to_goal_pose_srv_server
@@ -82,16 +65,6 @@ target_include_directories(go_to_goal_pose_srv_server
 ament_target_dependencies(go_to_goal_pose_srv_server ${DEPENDENCIES})
 install(TARGETS
 go_to_goal_pose_srv_server
-  DESTINATION lib/${PROJECT_NAME})
-
-# robot_control_sm
-add_executable(robot_control_sm
-  src/robot_control_sm.cpp)
-target_include_directories(robot_control_sm
-  PUBLIC include)
-ament_target_dependencies(robot_control_sm ${DEPENDENCIES})
-install(TARGETS
-robot_control_sm
   DESTINATION lib/${PROJECT_NAME})
 
 # go_to_goal_pose_test_client
@@ -121,9 +94,9 @@ install(DIRECTORY include/
 ament_export_include_directories(include)
 
 # Python
-install(PROGRAMS
-  scripts/control_sm.py
-  DESTINATION lib/${PROJECT_NAME}
-)
+# install(PROGRAMS
+#   scripts/control_sm.py
+#   DESTINATION lib/${PROJECT_NAME}
+# )
 
 ament_package()
