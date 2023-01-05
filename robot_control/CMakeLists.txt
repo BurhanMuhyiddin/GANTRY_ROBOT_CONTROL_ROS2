@@ -25,6 +25,7 @@ find_package(behaviortree_cpp_v3 REQUIRED)
 find_package(ros2_behavior_tree_msgs REQUIRED)
 find_package(robot_msgs REQUIRED)
 find_package(ros2_behavior_tree REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 include_directories(
   include
@@ -55,7 +56,8 @@ set(DEPENDENCIES
   interactive_markers
   moveit_ros_planning
   control_msgs
-  robot_msgs)
+  robot_msgs
+  geometry_msgs)
 
 # go_to_goal_pose_srv_server
 add_executable(go_to_goal_pose_srv_server

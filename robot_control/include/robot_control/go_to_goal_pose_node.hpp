@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <thread>
+#include <fstream>
 
 #include "rclcpp/rclcpp.hpp"
 #include <moveit/move_group_interface/move_group_interface.h>
@@ -15,6 +17,7 @@
 #include <moveit_msgs/msg/display_trajectory.hpp>
 #include <moveit_msgs/msg/attached_collision_object.hpp>
 #include <moveit_msgs/msg/collision_object.hpp>
+#include "geometry_msgs/msg/twist.hpp"
 
 class GoToGoalPoseNode : public BT::SyncActionNode
 {
@@ -22,12 +25,33 @@ public:
     GoToGoalPoseNode(const std::string& action_name, const BT::NodeConfiguration& config)
     : BT::SyncActionNode(action_name, config)
     {
+        RCLCPP_INFO(rclcpp::get_logger("GoToGoalPoseNode"), "Created\n");
         x_min_ = -4.55; x_max_ = 4.25;
         xj_min_ = 0.0; xj_max_ = 8.80;
         y_min_ = -1.65; y_max_ = 1.65;
         yj_min_ = -1.65; yj_max_ = 1.65;
         z_min_ = 0.26; z_max_= 3.19;
         zj_min_ = 0.10; zj_max_ = 3.04;
+
+        if (!dump_file.is_open())
+            dump_file.open(dump_file_path, std::ios_base::app);
+
+        if (!is_header_created){
+            dump_file << "velx,";
+            dump_file << "vely,";
+            dump_file << "velz,";
+            dump_file << "accx,";
+            dump_file << "accy,";
+            dump_file << "accz\n";
+
+            is_header_created = true;
+        }
+    }
+
+    ~GoToGoalPoseNode(){
+        if (dump_file.is_open())
+            dump_file.close();
+        RCLCPP_INFO(rclcpp::get_logger("GoToGoalPoseNode"), "Destroyed\n");
     }
 
     static BT::PortsList providedPorts()
@@ -67,8 +91,8 @@ public:
         {
             auto note_thread = std::make_unique<ros2_behavior_tree::NodeThread>(move_group_node);
 
-            move_group->setMaxVelocityScalingFactor(1.0);
-            move_group->setMaxAccelerationScalingFactor(1.0);
+            // move_group->setMaxVelocityScalingFactor(1.0);
+            // move_group->setMaxAccelerationScalingFactor(1.0);
 
             std::vector<double> joint_group_positions(3, 0.0);
             joint_group_positions[0] = map_vals(gx, x_min_, x_max_, xj_max_, xj_min_);//x;
@@ -80,6 +104,20 @@ public:
             moveit::planning_interface::MoveGroupInterface::Plan my_plan;
             bool success = (move_group->plan(my_plan) == moveit::core::MoveItErrorCode::SUCCESS);
             RCLCPP_INFO(rclcpp::get_logger("GoToGoalPoseNode"), "Planning %s", success ? "SUCCEDED" : "FAILED");
+
+            for (int i = 0; i < my_plan.trajectory_.joint_trajectory.points.size(); ++i){
+                // dump velocity and acc data
+                // RCLCPP_INFO(rclcpp::get_logger("GoToGoalPoseNode"), "Velocity_x %lf\n", my_plan.trajectory_.joint_trajectory.points[i].velocities[0]);
+                // RCLCPP_INFO(rclcpp::get_logger("GoToGoalPoseNode"), "Velocity_y %lf\n", my_plan.trajectory_.joint_trajectory.points[i].velocities[2]);
+                // RCLCPP_INFO(rclcpp::get_logger("GoToGoalPoseNode"), "Velocity_z %lf\n", my_plan.trajectory_.joint_trajectory.points[i].velocities[1]);
+                dump_file << std::to_string(my_plan.trajectory_.joint_trajectory.points[i].velocities[0]) << ",";
+                dump_file << std::to_string(my_plan.trajectory_.joint_trajectory.points[i].velocities[1]) << ",";
+                dump_file << std::to_string(my_plan.trajectory_.joint_trajectory.points[i].velocities[2]) << ",";
+                dump_file << std::to_string(my_plan.trajectory_.joint_trajectory.points[i].accelerations[0]) << ",";
+                dump_file << std::to_string(my_plan.trajectory_.joint_trajectory.points[i].accelerations[1]) << ",";
+                dump_file << std::to_string(my_plan.trajectory_.joint_trajectory.points[i].accelerations[2]) << "\n";
+            }
+
             if (success){
                 RCLCPP_INFO(rclcpp::get_logger("GoToGoalPoseNode"), "Execution started...\n");
                 move_group->execute(my_plan);
@@ -110,6 +148,14 @@ private:
     double yj_min_,  yj_max_;
     double z_min_, z_max_;
     double zj_min_, zj_max_;
+
+    static std::ofstream dump_file;
+    static const std::string dump_file_path;
+    static bool is_header_created;
 };
+
+bool GoToGoalPoseNode::is_header_created = false;
+const std::string GoToGoalPoseNode::dump_file_path = "/home/brh/robot2_ws/src/robot_control/data/vel_acc.txt";
+std::ofstream GoToGoalPoseNode::dump_file;
 
 #endif
